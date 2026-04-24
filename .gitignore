@@ -1,0 +1,11 @@
+# Claude Code local settings (machine-specific, not for sharing)
+.claude/settings.local.json
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Secrets
+.env
