@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SearchBar from '@/components/SearchBar';
 import TagChip from '@/components/TagChip';
+import ScoutMascot from '@/components/ScoutMascot';
 import { colors, palette, textPresets, spacing, radius } from '@/theme';
 
 const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Dad', 'Music'];
@@ -128,6 +129,11 @@ export default function HomeScreen({ onSearch, onAbout }: Props) {
                 <Text style={styles.retailerPillText}>{name}</Text>
               </View>
             ))}
+          </View>
+
+          {/* ── Scout mascot ───────────────────────────────── */}
+          <View style={styles.mascotWrapper}>
+            <ScoutMascot size={150} />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -246,5 +252,11 @@ const styles = StyleSheet.create({
   retailerPillText: {
     ...textPresets.caption,
     color: colors.textSecondary,
+  },
+
+  // Mascot
+  mascotWrapper: {
+    alignItems: 'center',
+    paddingTop: spacing[4],
   },
 });
