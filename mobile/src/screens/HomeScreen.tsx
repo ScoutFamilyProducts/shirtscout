@@ -16,7 +16,7 @@ import TagChip from '@/components/TagChip';
 import ScoutMascot from '@/components/ScoutMascot';
 import { colors, palette, textPresets, spacing, radius } from '@/theme';
 
-const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Hawaiian', 'Music'];
+const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Hawaiian', 'Music', 'Retro'];
 
 interface Props {
   onSearch?: (query: string) => void;
