@@ -16,7 +16,7 @@ import TagChip from '@/components/TagChip';
 import ScoutMascot from '@/components/ScoutMascot';
 import { colors, palette, textPresets, spacing, radius } from '@/theme';
 
-const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Dad', 'Music'];
+const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Hawaiian', 'Music'];
 
 interface Props {
   onSearch?: (query: string) => void;
@@ -257,6 +257,7 @@ const styles = StyleSheet.create({
   // Mascot
   mascotWrapper: {
     alignItems: 'center',
-    paddingTop: spacing[4],
+    paddingTop: spacing[10],
+    paddingBottom: spacing[2],
   },
 });
