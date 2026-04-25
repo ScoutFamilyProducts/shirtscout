@@ -15,9 +15,8 @@ import ProductCard from '@/components/ProductCard';
 import ProductSheet from '@/components/ProductSheet';
 import SkeletonCard from '@/components/SkeletonCard';
 import { searchProducts } from '@/api/search';
-import { Product, Retailer, SortOption, StoreFilter } from '@/types/product';
+import { Product, SortOption } from '@/types/product';
 import { colors, palette, textPresets, spacing, radius, borderWidth, shadow } from '@/theme';
-import { RETAILER_META } from '@/config/retailers';
 
 const SKELETON_COUNT = 5;
 
@@ -37,7 +36,7 @@ function sortProducts(products: Product[], sort: SortOption): Product[] {
       });
     case 'best-match':
     default:
-      return copy; // mock order is the "best match" order
+      return copy;
   }
 }
 
@@ -85,59 +84,6 @@ function SortBar({
   );
 }
 
-// ── Store filter bar ────────────────────────────────────────────────────────
-
-const STORE_OPTIONS: { key: StoreFilter; label: string }[] = [
-  { key: 'all',     label: 'All' },
-  { key: 'walmart', label: 'Walmart' },
-  { key: 'ebay',    label: 'eBay' },
-  { key: 'amazon',  label: 'Amazon' },
-];
-
-function StoreFilterBar({
-  selected,
-  counts,
-  onChange,
-}: {
-  selected: StoreFilter;
-  counts: Record<StoreFilter, number>;
-  onChange: (s: StoreFilter) => void;
-}) {
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.storeScroll}
-    >
-      {STORE_OPTIONS.map(({ key, label }) => {
-        const active = selected === key;
-        const dotColor = key === 'all' ? palette.softViolet : RETAILER_META[key as Retailer].color;
-        const count = counts[key];
-
-        return (
-          <Pressable
-            key={key}
-            onPress={() => onChange(key)}
-            style={[styles.storeChip, active && styles.storeChipActive]}
-          >
-            <View style={[styles.storeDot, { backgroundColor: active ? dotColor : colors.borderSubtle }]} />
-            <Text style={[styles.storeChipText, active && styles.storeChipTextActive]}>
-              {label}
-            </Text>
-            {count > 0 && (
-              <View style={[styles.storeCount, active && styles.storeCountActive]}>
-                <Text style={[styles.storeCountText, active && styles.storeCountTextActive]}>
-                  {count}
-                </Text>
-              </View>
-            )}
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-}
-
 // ── Results screen ──────────────────────────────────────────────────────────
 
 interface Props {
@@ -151,11 +97,9 @@ export default function ResultsScreen({ query, onBack }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
   const [sort, setSort] = useState<SortOption>('best-match');
-  const [storeFilter, setStoreFilter] = useState<StoreFilter>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const listOpacity = useRef(new Animated.Value(0)).current;
 
-  // Fetch from backend
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
@@ -181,26 +125,10 @@ export default function ResultsScreen({ query, onBack }: Props) {
     return () => controller.abort();
   }, [query, retryKey]);
 
-  // Filtered + sorted product list
-  const filteredProducts = useMemo(() => {
-    const filtered = storeFilter === 'all'
-      ? products
-      : products.filter((p) => p.retailer === storeFilter);
-    return sortProducts(filtered, sort);
-  }, [sort, storeFilter, products]);
-
-  // Count per store for the filter bar badges
-  const storeCounts = useMemo((): Record<StoreFilter, number> => ({
-    all:     products.length,
-    walmart: products.filter((p) => p.retailer === 'walmart').length,
-    ebay:    products.filter((p) => p.retailer === 'ebay').length,
-    amazon:  products.filter((p) => p.retailer === 'amazon').length,
-  }), [products]);
-
-  // Reset to best-match when store filter changes
-  function handleStoreChange(s: StoreFilter) {
-    setStoreFilter(s);
-  }
+  const sortedProducts = useMemo(
+    () => sortProducts(products, sort),
+    [sort, products],
+  );
 
   const renderItem = useCallback(({ item }: { item: Product }) => (
     <ProductCard product={item} onPress={setSelectedProduct} />
@@ -225,7 +153,7 @@ export default function ResultsScreen({ query, onBack }: Props) {
             </Text>
             {!loading && !error && (
               <Text style={styles.headerCount}>
-                {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''}
+                {sortedProducts.length} result{sortedProducts.length !== 1 ? 's' : ''}
               </Text>
             )}
           </View>
@@ -234,15 +162,6 @@ export default function ResultsScreen({ query, onBack }: Props) {
         {/* ── Sort bar ──────────────────────────────────────────── */}
         <View style={styles.sortBarWrapper}>
           <SortBar selected={sort} onChange={setSort} />
-        </View>
-
-        {/* ── Store filter bar ──────────────────────────────────── */}
-        <View style={styles.storeBarWrapper}>
-          <StoreFilterBar
-            selected={storeFilter}
-            counts={storeCounts}
-            onChange={handleStoreChange}
-          />
         </View>
 
         {/* ── Thin separator ────────────────────────────────────── */}
@@ -262,12 +181,12 @@ export default function ResultsScreen({ query, onBack }: Props) {
         ) : (
           <Animated.View style={[styles.listContainer, { opacity: listOpacity }]}>
             <FlatList
-              data={filteredProducts}
+              data={sortedProducts}
               keyExtractor={keyExtractor}
               renderItem={renderItem}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={<EmptyState storeFilter={storeFilter} />}
+              ListEmptyComponent={<EmptyState />}
             />
           </Animated.View>
         )}
@@ -284,16 +203,12 @@ export default function ResultsScreen({ query, onBack }: Props) {
 
 // ── Empty state ─────────────────────────────────────────────────────────────
 
-function EmptyState({ storeFilter }: { storeFilter: StoreFilter }) {
+function EmptyState() {
   return (
     <View style={styles.empty}>
       <Ionicons name="search-outline" size={48} color={colors.borderSubtle} />
       <Text style={styles.emptyTitle}>No results</Text>
-      <Text style={styles.emptyBody}>
-        {storeFilter !== 'all'
-          ? `Try switching to "All" to see results from other stores.`
-          : `No shirts found. Try a different search term.`}
-      </Text>
+      <Text style={styles.emptyBody}>No shirts found. Try a different search term.</Text>
     </View>
   );
 }
@@ -389,63 +304,6 @@ const styles = StyleSheet.create({
     color: palette.darkBase,
   },
 
-  // Store filter bar
-  storeBarWrapper: {
-    paddingBottom: spacing[2],
-  },
-  storeScroll: {
-    paddingHorizontal: spacing[4],
-    gap: spacing[2],
-  },
-  storeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[1],
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: radius.full,
-    backgroundColor: colors.bgSurface,
-    borderWidth: borderWidth.thin,
-    borderColor: colors.border,
-  },
-  storeChipActive: {
-    backgroundColor: colors.bgSurface,
-    borderColor: colors.accentSecondary,
-  },
-  storeDot: {
-    width: 7,
-    height: 7,
-    borderRadius: radius.full,
-  },
-  storeChipText: {
-    ...textPresets.label,
-    color: colors.textSecondary,
-    fontSize: 12,
-  },
-  storeChipTextActive: {
-    color: colors.textPrimary,
-  },
-  storeCount: {
-    minWidth: 18,
-    height: 16,
-    borderRadius: radius.full,
-    backgroundColor: colors.bgOverlay,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  storeCountActive: {
-    backgroundColor: `${palette.softViolet}30`,
-  },
-  storeCountText: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  storeCountTextActive: {
-    color: palette.softViolet,
-  },
-
   // Separator
   separator: {
     height: borderWidth.hairline,
@@ -463,7 +321,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[16],
   },
 
-  // Empty state
+  // Empty / error shared container
   empty: {
     alignItems: 'center',
     paddingTop: spacing[16],

@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
   Animated,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,11 +18,11 @@ import { colors, palette, textPresets, spacing, radius } from '@/theme';
 const SUGGESTED_TAGS = ['Funny', 'Golf', 'Crypto', 'Vintage', 'Oregon'];
 
 interface Props {
-  // Reserved for future router integration
   onSearch?: (query: string) => void;
+  onAbout?: () => void;
 }
 
-export default function HomeScreen({ onSearch }: Props) {
+export default function HomeScreen({ onSearch, onAbout }: Props) {
   const [query, setQuery] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
@@ -70,6 +71,10 @@ export default function HomeScreen({ onSearch }: Props) {
               <Ionicons name="shirt-outline" size={17} color={palette.neonGreen} />
             </LinearGradient>
             <Text style={styles.headerWordmark}>ShirtScout</Text>
+            <View style={styles.headerSpacer} />
+            <Pressable onPress={onAbout} hitSlop={12} style={styles.aboutBtn}>
+              <Ionicons name="information-circle-outline" size={22} color={colors.textSecondary} />
+            </Pressable>
           </View>
 
           {/* ── Hero copy ──────────────────────────────────── */}
@@ -166,6 +171,12 @@ const styles = StyleSheet.create({
     ...textPresets.subheading,
     color: colors.textPrimary,
     letterSpacing: -0.5,
+  },
+  headerSpacer: {
+    flex: 1,
+  },
+  aboutBtn: {
+    padding: spacing[1],
   },
 
   // Hero
