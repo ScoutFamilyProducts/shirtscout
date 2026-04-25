@@ -16,7 +16,7 @@ import TagChip from '@/components/TagChip';
 import ScoutMascot from '@/components/ScoutMascot';
 import { colors, palette, textPresets, spacing, radius } from '@/theme';
 
-const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Hawaiian', 'Music', 'Retro'];
+const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming'];
 
 interface Props {
   onSearch?: (query: string) => void;
@@ -115,21 +115,8 @@ export default function HomeScreen({ onSearch, onAbout }: Props) {
 
           {/* ── Helper text ────────────────────────────────── */}
           <Text style={styles.helperText}>
-            ShirtScout searches Walmart, eBay, and Amazon simultaneously so you
-            see every deal — sorted by price — in one place.
+            ShirtScout scans a growing network of retailers so you never miss a deal — all sorted by price, all in one place.
           </Text>
-
-          {/* ── Decorative divider ─────────────────────────── */}
-          <View style={styles.divider} />
-
-          {/* ── Retailer pills (informational only) ────────── */}
-          <View style={styles.retailerRow}>
-            {['Walmart', 'eBay', 'Amazon'].map((name) => (
-              <View key={name} style={styles.retailerPill}>
-                <Text style={styles.retailerPillText}>{name}</Text>
-              </View>
-            ))}
-          </View>
 
           {/* ── Scout mascot ───────────────────────────────── */}
           <View style={styles.mascotWrapper}>
@@ -227,31 +214,6 @@ const styles = StyleSheet.create({
     ...textPresets.caption,
     color: colors.textSecondary,
     lineHeight: 19,
-  },
-
-  // Divider
-  divider: {
-    height: 1,
-    backgroundColor: colors.borderSubtle,
-    marginVertical: -spacing[2],
-  },
-
-  // Retailer pills (informational only — no tap action)
-  retailerRow: {
-    flexDirection: 'row',
-    gap: spacing[2],
-  },
-  retailerPill: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[1],
-    borderRadius: radius.full,
-    backgroundColor: colors.bgSurface,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  retailerPillText: {
-    ...textPresets.caption,
-    color: colors.textSecondary,
   },
 
   // Mascot
