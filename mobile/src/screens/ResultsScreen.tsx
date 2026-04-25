@@ -3,12 +3,12 @@ import {
   Animated,
   FlatList,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import ProductCard from '@/components/ProductCard';
@@ -216,7 +216,7 @@ export default function ResultsScreen({ query, onBack }: Props) {
         {/* ── Header ───────────────────────────────────────────── */}
         <View style={styles.header}>
           <Pressable onPress={onBack} style={styles.backBtn} hitSlop={12}>
-            <Ionicons name="arrow-back-outline" size={22} color={colors.textPrimary} />
+            <Ionicons name="chevron-back" size={20} color={colors.textSecondary} />
           </Pressable>
 
           <View style={styles.headerCenter}>
@@ -338,9 +338,10 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: radius.full,
     backgroundColor: colors.bgSurface,
+    borderWidth: borderWidth.thin,
+    borderColor: `${palette.softViolet}28`,
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadow.sm,
   },
   headerCenter: {
     flex: 1,

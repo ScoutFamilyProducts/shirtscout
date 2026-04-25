@@ -73,11 +73,18 @@ interface EbaySearchResponse {
 
 // ---------- mapping ----------
 
-function mapItem(item: EbayItemSummary): NormalizedProduct {
+// eBay Partner Network rover URL — US site rotation 711-53200-19255-0.
+// campid ties the click to the campaign; mpre deep-links to the listing.
+function buildRoverUrl(productUrl: string, campaignId: string): string {
+  return `https://rover.ebay.com/rover/1/711-53200-19255-0/1?campid=${campaignId}&toolid=10001&mpre=${encodeURIComponent(productUrl)}`;
+}
+
+function mapItem(item: EbayItemSummary, campaignId: string): NormalizedProduct {
   const price = parsePrice(item.price?.value);
   const currency = item.price?.currency ?? 'USD';
   const imageUrl = sanitizeUrl(item.image?.imageUrl);
   const productUrl = sanitizeUrl(item.itemWebUrl) ?? '';
+  const affiliateUrl = campaignId ? buildRoverUrl(productUrl, campaignId) : null;
 
   const aspects = item.localizedAspects ?? [];
   const sizes = aspects
@@ -97,9 +104,7 @@ function mapItem(item: EbayItemSummary): NormalizedProduct {
     currency,
     imageUrl,
     productUrl,
-    // eBay Partner Network rover links require a campaign ID not available
-    // from standard Browse API responses — leave null until PN is configured.
-    affiliateUrl: null,
+    affiliateUrl,
     rating: null,
     reviewCount: null,
     // All items returned by Browse API search are active listings.
@@ -126,10 +131,12 @@ export class EbayConnector implements Connector {
 
   private appId: string;
   private certId: string;
+  private campaignId: string;
 
   constructor() {
     this.appId = process.env.EBAY_APP_ID ?? '';
     this.certId = process.env.EBAY_CERT_ID ?? '';
+    this.campaignId = process.env.EBAY_CAMPAIGN_ID ?? '';
   }
 
   async search(query: SearchQuery): Promise<ConnectorResult> {
@@ -174,7 +181,7 @@ export class EbayConnector implements Connector {
       });
 
       const items = data.itemSummaries ?? [];
-      const products = items.map(mapItem);
+      const products = items.map((item) => mapItem(item, this.campaignId));
       const total = data.total ?? products.length;
 
       return { products, total };

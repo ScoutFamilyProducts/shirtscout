@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import {
   Animated,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import SearchBar from '@/components/SearchBar';
 import TagChip from '@/components/TagChip';
 import { colors, palette, textPresets, spacing, radius } from '@/theme';

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SplashScreen from '@/screens/SplashScreen';
 import HomeScreen from '@/screens/HomeScreen';
 import ResultsScreen from '@/screens/ResultsScreen';
@@ -17,17 +18,19 @@ export default function App() {
   }
 
   return (
-    <View style={styles.root}>
-      {screen === 'splash' && (
-        <SplashScreen onDismiss={() => setScreen('home')} />
-      )}
-      {screen === 'home' && (
-        <HomeScreen onSearch={handleSearch} />
-      )}
-      {screen === 'results' && (
-        <ResultsScreen query={searchQuery} onBack={() => setScreen('home')} />
-      )}
-    </View>
+    <SafeAreaProvider>
+      <View style={styles.root}>
+        {screen === 'splash' && (
+          <SplashScreen onDismiss={() => setScreen('home')} />
+        )}
+        {screen === 'home' && (
+          <HomeScreen onSearch={handleSearch} />
+        )}
+        {screen === 'results' && (
+          <ResultsScreen query={searchQuery} onBack={() => setScreen('home')} />
+        )}
+      </View>
+    </SafeAreaProvider>
   );
 }
 
