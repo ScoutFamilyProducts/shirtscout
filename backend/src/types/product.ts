@@ -33,7 +33,5 @@ export interface SearchResults {
   totalResults: number;
   page: number;
   limit: number;
-  retailers: {
-    [K in Retailer]?: { count: number; error?: string };
-  };
+  retailers: Record<string, { count: number; error?: string }>;
 }

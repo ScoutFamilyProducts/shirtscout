@@ -1,15 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { SearchQuery, Retailer } from '../types/product';
-import { WalmartConnector } from '../connectors/walmart';
-import { EbayConnector } from '../connectors/ebay';
-import { AmazonConnector } from '../connectors/amazon';
+import { SearchQuery } from '../types/product';
+import { connectors, isRetailer } from '../connectors/registry';
 import { deduplicateById } from '../normalizer';
 import { getCachedResults, setCachedResults, buildCacheKey } from '../cache';
 import logger from '../logger';
 
 const router = Router();
-
-const connectors = [new WalmartConnector(), new EbayConnector(), new AmazonConnector()];
 
 router.get('/', async (req: Request, res: Response) => {
   const {
@@ -34,7 +30,9 @@ router.get('/', async (req: Request, res: Response) => {
     maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
     size,
     color,
-    retailers: retailers ? (retailers.split(',') as Retailer[]) : undefined,
+    retailers: retailers
+      ? retailers.split(',').filter(isRetailer)
+      : undefined,
     page: parseInt(page, 10),
     limit: Math.min(parseInt(limit, 10), 100),
   };
@@ -47,23 +45,23 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   const activeConnectors = searchQuery.retailers
-    ? connectors.filter((c) => searchQuery.retailers!.includes(c.name as Retailer))
+    ? connectors.filter((c) => searchQuery.retailers!.includes(c.name))
     : connectors;
 
   const settled = await Promise.allSettled(activeConnectors.map((c) => c.search(searchQuery)));
 
-  const retailerStats: SearchQuery['retailers'] extends undefined ? never : Record<string, { count: number; error?: string }> = {} as never;
+  const retailerStats: Record<string, { count: number; error?: string }> = {};
   let allProducts = settled.flatMap((result, i) => {
-    const name = activeConnectors[i].name as Retailer;
+    const name = activeConnectors[i].name;
     if (result.status === 'fulfilled') {
-      (retailerStats as Record<string, { count: number; error?: string }>)[name] = { count: result.value.products.length };
+      retailerStats[name] = { count: result.value.products.length };
       if (result.value.error) {
-        (retailerStats as Record<string, { count: number; error?: string }>)[name].error = result.value.error;
+        retailerStats[name].error = result.value.error;
       }
       return result.value.products;
     } else {
       logger.error(`Connector ${name} failed`, { error: result.reason });
-      (retailerStats as Record<string, { count: number; error?: string }>)[name] = { count: 0, error: String(result.reason) };
+      retailerStats[name] = { count: 0, error: String(result.reason) };
       return [];
     }
   });

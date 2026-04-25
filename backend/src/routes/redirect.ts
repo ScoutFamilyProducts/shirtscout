@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { allowedRedirectHosts } from '../connectors/registry';
 import logger from '../logger';
 
 const router = Router();
@@ -26,14 +27,8 @@ router.get('/', (req: Request, res: Response) => {
     return;
   }
 
-  const allowedHosts = [
-    'walmart.com', 'www.walmart.com',
-    'ebay.com', 'www.ebay.com',
-    'amazon.com', 'www.amazon.com', 'amzn.to',
-  ];
-
   const host = parsed.hostname.toLowerCase();
-  if (!allowedHosts.some((h) => host === h || host.endsWith(`.${h}`))) {
+  if (!allowedRedirectHosts.some((h) => host === h || host.endsWith(`.${h}`))) {
     res.status(403).json({ error: 'Host not in allowlist' });
     return;
   }

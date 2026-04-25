@@ -1,4 +1,4 @@
-import { NormalizedProduct, SearchQuery } from '../types/product';
+import { NormalizedProduct, Retailer, SearchQuery } from '../types/product';
 
 export interface ConnectorResult {
   products: NormalizedProduct[];
@@ -7,6 +7,6 @@ export interface ConnectorResult {
 }
 
 export interface Connector {
-  name: string;
+  name: Retailer;
   search(query: SearchQuery): Promise<ConnectorResult>;
 }
