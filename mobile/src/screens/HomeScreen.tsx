@@ -78,6 +78,9 @@ export default function HomeScreen({ onSearch }: Props) {
               Find your next{'\n'}
               <Text style={styles.heroAccent}>favorite tee.</Text>
             </Text>
+            <Text style={styles.heroSubtitle}>
+              No social required. No algorithm nonsense.
+            </Text>
           </View>
 
           {/* ── Search bar ─────────────────────────────────── */}
@@ -176,6 +179,11 @@ const styles = StyleSheet.create({
   },
   heroAccent: {
     color: colors.accentPrimary,
+  },
+
+  heroSubtitle: {
+    ...textPresets.body,
+    color: colors.textSecondary,
   },
 
   // Search
