@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
   scroll: {
     paddingHorizontal: spacing[5],
     paddingBottom: spacing[16],
-    alignItems: 'center',
     gap: spacing[6],
   },
 

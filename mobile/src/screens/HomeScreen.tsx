@@ -15,7 +15,7 @@ import SearchBar from '@/components/SearchBar';
 import TagChip from '@/components/TagChip';
 import { colors, palette, textPresets, spacing, radius } from '@/theme';
 
-const SUGGESTED_TAGS = ['Funny', 'Golf', 'Crypto', 'Vintage', 'Oregon'];
+const SUGGESTED_TAGS = ['Funny', 'Vintage', 'Gaming', 'Dad', 'Music'];
 
 interface Props {
   onSearch?: (query: string) => void;
