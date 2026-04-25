@@ -7,6 +7,8 @@ import {
   View,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SearchBar from '@/components/SearchBar';
 import TagChip from '@/components/TagChip';
@@ -59,9 +61,14 @@ export default function HomeScreen({ onSearch }: Props) {
         >
           {/* ── Header ─────────────────────────────────────── */}
           <View style={styles.header}>
-            <View style={styles.logoBadgeSmall}>
-              <Text style={styles.logoBadgeText}>SS</Text>
-            </View>
+            <LinearGradient
+              colors={[`${palette.neonGreen}18`, `${palette.softViolet}12`]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.logoBadge}
+            >
+              <Ionicons name="shirt-outline" size={17} color={palette.neonGreen} />
+            </LinearGradient>
             <Text style={styles.headerWordmark}>ShirtScout</Text>
           </View>
 
@@ -142,21 +149,15 @@ const styles = StyleSheet.create({
     gap: spacing[2],
     marginBottom: spacing[2],
   },
-  logoBadgeSmall: {
-    width: 32,
-    height: 32,
+  logoBadge: {
+    width: 34,
+    height: 34,
     borderRadius: radius.md,
-    backgroundColor: colors.bgSurface,
     borderWidth: 1,
-    borderColor: `${palette.neonGreen}50`,
+    borderColor: `${palette.neonGreen}38`,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoBadgeText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: palette.neonGreen,
-    letterSpacing: 1,
+    overflow: 'hidden',
   },
   headerWordmark: {
     ...textPresets.subheading,
