@@ -184,11 +184,13 @@ const styles = StyleSheet.create({
   rowLabel: {
     ...textPresets.body,
     color: colors.textSecondary,
+    flex: 1,
   },
   rowValue: {
     ...textPresets.body,
     color: colors.textPrimary,
     fontWeight: '500',
+    flexShrink: 0,
   },
 
   // Feedback
