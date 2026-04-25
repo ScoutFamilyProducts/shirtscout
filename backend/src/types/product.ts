@@ -12,6 +12,7 @@ export interface NormalizedProduct {
   rating: number | null;
   reviewCount: number | null;
   inStock: boolean;
+  freeShipping: boolean;
   sizes: string[];
   colors: string[];
 }

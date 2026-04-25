@@ -104,6 +104,7 @@ function mapItem(item: EbayItemSummary): NormalizedProduct {
     reviewCount: null,
     // All items returned by Browse API search are active listings.
     inStock: true,
+    freeShipping: false,
     sizes,
     colors,
   };

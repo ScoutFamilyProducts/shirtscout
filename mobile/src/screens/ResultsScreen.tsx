@@ -14,13 +14,12 @@ import { Ionicons } from '@expo/vector-icons';
 import ProductCard from '@/components/ProductCard';
 import ProductSheet from '@/components/ProductSheet';
 import SkeletonCard from '@/components/SkeletonCard';
-import { MOCK_PRODUCTS } from '@/mocks/products';
+import { searchProducts } from '@/api/search';
 import { Product, Retailer, SortOption, StoreFilter } from '@/types/product';
 import { colors, palette, textPresets, spacing, radius, borderWidth, shadow } from '@/theme';
 import { RETAILER_META } from '@/config/retailers';
 
 const SKELETON_COUNT = 5;
-const SIMULATED_LOAD_MS = 1500;
 
 // ── Sort helpers ───────────────────────────────────────────────────────────
 
@@ -148,39 +147,55 @@ interface Props {
 
 export default function ResultsScreen({ query, onBack }: Props) {
   const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [sort, setSort] = useState<SortOption>('best-match');
   const [storeFilter, setStoreFilter] = useState<StoreFilter>('all');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const listOpacity = useRef(new Animated.Value(0)).current;
 
-  // Simulate API load
+  // Fetch from backend
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-      Animated.timing(listOpacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    }, SIMULATED_LOAD_MS);
-    return () => clearTimeout(timer);
-  }, []);
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+    listOpacity.setValue(0);
+
+    searchProducts(query, controller.signal)
+      .then((result) => {
+        setProducts(result.products);
+        setLoading(false);
+        Animated.timing(listOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      })
+      .catch((err: unknown) => {
+        if ((err as Error)?.name === 'AbortError') return;
+        setError(err instanceof Error ? err.message : 'Something went wrong');
+        setLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [query, retryKey]);
 
   // Filtered + sorted product list
   const filteredProducts = useMemo(() => {
     const filtered = storeFilter === 'all'
-      ? MOCK_PRODUCTS
-      : MOCK_PRODUCTS.filter((p) => p.retailer === storeFilter);
+      ? products
+      : products.filter((p) => p.retailer === storeFilter);
     return sortProducts(filtered, sort);
-  }, [sort, storeFilter]);
+  }, [sort, storeFilter, products]);
 
   // Count per store for the filter bar badges
   const storeCounts = useMemo((): Record<StoreFilter, number> => ({
-    all:     MOCK_PRODUCTS.length,
-    walmart: MOCK_PRODUCTS.filter((p) => p.retailer === 'walmart').length,
-    ebay:    MOCK_PRODUCTS.filter((p) => p.retailer === 'ebay').length,
-    amazon:  MOCK_PRODUCTS.filter((p) => p.retailer === 'amazon').length,
-  }), []);
+    all:     products.length,
+    walmart: products.filter((p) => p.retailer === 'walmart').length,
+    ebay:    products.filter((p) => p.retailer === 'ebay').length,
+    amazon:  products.filter((p) => p.retailer === 'amazon').length,
+  }), [products]);
 
   // Reset to best-match when store filter changes
   function handleStoreChange(s: StoreFilter) {
@@ -208,7 +223,7 @@ export default function ResultsScreen({ query, onBack }: Props) {
             <Text style={styles.headerQuery} numberOfLines={1}>
               "{query}"
             </Text>
-            {!loading && (
+            {!loading && !error && (
               <Text style={styles.headerCount}>
                 {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''}
               </Text>
@@ -234,7 +249,9 @@ export default function ResultsScreen({ query, onBack }: Props) {
         <View style={styles.separator} />
 
         {/* ── List ──────────────────────────────────────────────── */}
-        {loading ? (
+        {error ? (
+          <ErrorState message={error} onRetry={() => setRetryKey((k) => k + 1)} />
+        ) : loading ? (
           <FlatList
             data={Array.from({ length: SKELETON_COUNT }, (_, i) => i)}
             keyExtractor={(i) => String(i)}
@@ -277,6 +294,21 @@ function EmptyState({ storeFilter }: { storeFilter: StoreFilter }) {
           ? `Try switching to "All" to see results from other stores.`
           : `No shirts found. Try a different search term.`}
       </Text>
+    </View>
+  );
+}
+
+// ── Error state ─────────────────────────────────────────────────────────────
+
+function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <View style={styles.empty}>
+      <Ionicons name="cloud-offline-outline" size={48} color={colors.borderSubtle} />
+      <Text style={styles.emptyTitle}>Couldn't load results</Text>
+      <Text style={styles.emptyBody}>{message}</Text>
+      <Pressable style={styles.retryBtn} onPress={onRetry}>
+        <Text style={styles.retryText}>Try again</Text>
+      </Pressable>
     </View>
   );
 }
@@ -446,5 +478,20 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
+  },
+
+  // Retry button (error state)
+  retryBtn: {
+    marginTop: spacing[2],
+    paddingHorizontal: spacing[6],
+    paddingVertical: spacing[3],
+    borderRadius: radius.full,
+    backgroundColor: palette.neonGreen,
+  },
+  retryText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: palette.darkBase,
+    letterSpacing: 0.2,
   },
 });

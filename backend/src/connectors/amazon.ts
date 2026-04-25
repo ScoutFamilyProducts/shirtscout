@@ -316,6 +316,7 @@ function mapItem(item: PaapiItem, partnerTag: string): NormalizedProduct {
     rating: rating !== null ? Number(rating) : null,
     reviewCount,
     inStock,
+    freeShipping: listing?.DeliveryInfo?.IsFreeShippingEligible ?? false,
     sizes,
     colors,
   };

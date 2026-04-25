@@ -84,6 +84,7 @@ function mapItem(item: WalmartItem): NormalizedProduct {
     rating: rating !== null && !isNaN(rating) ? rating : null,
     reviewCount: item.numReviews ?? null,
     inStock: (item.stock ?? '').toLowerCase() !== 'not available',
+    freeShipping: false,
     sizes,
     colors,
   };
