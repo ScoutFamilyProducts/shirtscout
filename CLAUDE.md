@@ -56,6 +56,15 @@ src/
 
 See `.env.example`. Connector API keys are required for live results; the server starts without them but connectors will return errors.
 
+### Retailer connector policies
+
+| Retailer   | Allowed integration method | Prohibited |
+|------------|---------------------------|------------|
+| JCPenney   | CJ Affiliate product feeds, deeplinks, and affiliate links **only** — after program approval | Scraping JCPenney.com, HTML parsing, browser automation, any direct crawl |
+| All others | Per their published developer/affiliate program terms | Scraping or undocumented APIs unless terms explicitly permit |
+
+**JCPenney is a CJ feed/link connector only.** Never write code that sends HTTP requests directly to JCPenney.com, parses their HTML, or uses browser automation (Playwright, Puppeteer, etc.) against their site. JCPenney's terms of service prohibit scraping. Any JCP connector must use only approved CJ APIs and feed URLs.
+
 ## Mobile
 
 ### Setup & Commands
