@@ -17,6 +17,7 @@ const VERSION = '0.1.0';
 const FEEDBACK_EMAIL = 'scoutfamilyproducts@gmail.com';
 const FEEDBACK_SUBJECT = 'ShirtScout Feedback';
 const WEBSITE_URL = 'https://scoutfamilyproducts.com';
+const PRIVACY_URL = 'https://scoutfamilyproducts.com/privacy';
 
 function openFeedback() {
   Linking.openURL(
@@ -26,6 +27,10 @@ function openFeedback() {
 
 function openWebsite() {
   Linking.openURL(WEBSITE_URL).catch(() => {});
+}
+
+function openPrivacy() {
+  Linking.openURL(PRIVACY_URL).catch(() => {});
 }
 
 interface Props {
@@ -81,6 +86,10 @@ export default function AboutScreen({ onBack }: Props) {
             <Pressable style={styles.websiteLink} onPress={openWebsite}>
               <Ionicons name="globe-outline" size={14} color={palette.softViolet} />
               <Text style={styles.websiteLinkText}>scoutfamilyproducts.com</Text>
+            </Pressable>
+            <Pressable style={styles.websiteLink} onPress={openPrivacy}>
+              <Ionicons name="shield-checkmark-outline" size={14} color={palette.softViolet} />
+              <Text style={styles.websiteLinkText}>Privacy Policy</Text>
             </Pressable>
           </View>
 
