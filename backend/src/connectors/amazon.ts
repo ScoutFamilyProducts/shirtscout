@@ -284,17 +284,23 @@ function applyMockFilters(items: PaapiItem[], query: SearchQuery): PaapiItem[] {
   return filtered.slice((page - 1) * limit, page * limit);
 }
 
+// ---------- URL helpers ----------
+
+export function buildAmazonSearchUrl(query: string, partnerTag?: string): string {
+  const params = new URLSearchParams({ k: query });
+  if (partnerTag) params.append('tag', partnerTag);
+  return `https://www.amazon.com/s?${params}`;
+}
+
 // ---------- mapping ----------
 
-function mapItem(item: PaapiItem, partnerTag: string): NormalizedProduct {
+function mapItem(item: PaapiItem, partnerTag: string, searchQuery: string): NormalizedProduct {
   const listing = item.Offers?.Listings?.[0];
   const price = parsePrice(listing?.Price?.Amount);
   const currency = listing?.Price?.Currency ?? 'USD';
   const imageUrl = sanitizeUrl(item.Images?.Primary?.Large?.URL);
-  const productUrl = sanitizeUrl(item.DetailPageURL) ?? `https://www.amazon.com/dp/${item.ASIN}`;
-  const affiliateUrl = partnerTag
-    ? `https://www.amazon.com/dp/${item.ASIN}?tag=${partnerTag}`
-    : null;
+  const productUrl = buildAmazonSearchUrl(searchQuery, partnerTag);
+  const affiliateUrl = partnerTag ? buildAmazonSearchUrl(searchQuery, partnerTag) : null;
 
   const rating = item.CustomerReviews?.StarRating?.DisplayValue ?? null;
   const reviewCount = item.CustomerReviews?.Count ?? null;
@@ -424,7 +430,7 @@ export class AmazonConnector implements Connector {
   private searchMock(query: SearchQuery): ConnectorResult {
     logger.debug('AmazonConnector.searchMock', { query: query.query });
     const items = applyMockFilters(MOCK_ITEMS, query);
-    const products = items.map((item) => mapItem(item, this.partnerTag));
+    const products = items.map((item) => mapItem(item, this.partnerTag, query.query));
     return { products, total: MOCK_ITEMS.length };
   }
 
@@ -476,7 +482,7 @@ export class AmazonConnector implements Connector {
       }
 
       const items = data.SearchResult?.Items ?? [];
-      const products = items.map((item) => mapItem(item, this.partnerTag));
+      const products = items.map((item) => mapItem(item, this.partnerTag, query.query));
       const total = data.SearchResult?.TotalResultCount ?? products.length;
 
       return { products, total };
