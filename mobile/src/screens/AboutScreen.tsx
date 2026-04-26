@@ -16,11 +16,16 @@ import { colors, palette, textPresets, spacing, radius, borderWidth } from '@/th
 const VERSION = '0.1.0';
 const FEEDBACK_EMAIL = 'scoutfamilyproducts@gmail.com';
 const FEEDBACK_SUBJECT = 'ShirtScout Feedback';
+const WEBSITE_URL = 'https://scoutfamilyproducts.com';
 
 function openFeedback() {
   Linking.openURL(
     `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(FEEDBACK_SUBJECT)}`
   ).catch(() => {});
+}
+
+function openWebsite() {
+  Linking.openURL(WEBSITE_URL).catch(() => {});
 }
 
 interface Props {
@@ -73,6 +78,10 @@ export default function AboutScreen({ onBack }: Props) {
               <Text style={styles.feedbackBtnText}>Send Feedback</Text>
             </Pressable>
             <Text style={styles.feedbackEmail}>{FEEDBACK_EMAIL}</Text>
+            <Pressable style={styles.websiteLink} onPress={openWebsite}>
+              <Ionicons name="globe-outline" size={14} color={palette.softViolet} />
+              <Text style={styles.websiteLinkText}>scoutfamilyproducts.com</Text>
+            </Pressable>
           </View>
 
           {/* ── Copyright ── */}
@@ -161,7 +170,7 @@ const styles = StyleSheet.create({
 
   // Info card
   card: {
-    width: '100%',
+    alignSelf: 'stretch',
     backgroundColor: colors.bgSurface,
     borderRadius: radius.xl,
     borderWidth: borderWidth.thin,
@@ -215,6 +224,16 @@ const styles = StyleSheet.create({
   feedbackEmail: {
     ...textPresets.caption,
     color: colors.textSecondary,
+  },
+  websiteLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing[1],
+    marginTop: spacing[1],
+  },
+  websiteLinkText: {
+    ...textPresets.caption,
+    color: palette.softViolet,
   },
 
   // Copyright
